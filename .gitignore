@@ -1,0 +1,11 @@
+# -*- mode: gitignore; -*-
+!.gitignore
+
+.project
+.test-org-id-locations
+
+*.swp
+*~
+\#*\#
+*.elc
+.\#*
