@@ -20,8 +20,10 @@ PROCEDURE DIVISION.
 : Hello COBOL
 ```
 
-It was created with [ob-rust](https://github.com/micanzhang/ob-rust)
-as model.
+Open the compiled source file with `M-x ob-cobol-last-src-file`.
+
+This package was created with
+[ob-rust](https://github.com/micanzhang/ob-rust) as model.
 
 ## Rules
 

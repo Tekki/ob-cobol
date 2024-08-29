@@ -5,9 +5,10 @@
 ;; Author: Tekki (Rolf Stöckli)
 ;; Maintainer: Tekki
 ;; Created: August 27, 2024
+;; Updated: August 29, 2024
 ;; Keywords: cobol, languages, org, babel
 ;; Homepage: https://github.com/
-;; Version: 0.0.1
+;; Version: 0.0.2
 
 ;;; License:
 
@@ -47,12 +48,29 @@
 (defvar ob-cobol-compiler "cobc"
   "Path to the COBOL compiler.")
 
+(defvar ob-cobol-last-src-file nil
+  "The last compiled source file.")
+
+(defun ob-cobol-last-src-file ()
+  "Open the last compiled source file."
+  (interactive)
+
+  (if ob-cobol-last-src-file
+      (progn
+        (if (eq 1 (length (window-list)))
+            (split-window-sensibly)
+          (other-window 1))
+        (find-file ob-cobol-last-src-file))
+    (message "No file available!")))
+
 (defun org-babel-execute:cobol (body params)
   "Execute a block of Template code with org-babel.
 This function is called by `org-babel-execute-src-block'."
   (message "executing COBOL source code block")
-  (let* ((tmp-src-file (org-babel-temp-file "cobol-src-" ".cbl"))
-         (tmp-binary (org-babel-temp-file "cobol-bin-"))
+
+  (setq ob-cobol-last-src-file (org-babel-temp-file "cobol-src-" ".cbl"))
+
+  (let* ((tmp-binary (org-babel-temp-file "cobol-bin-"))
          (processed-params (org-babel-process-params params))
          (source-format (alist-get :source-format processed-params ob-cobol-source-format))
          (source-indent (if (string-equal source-format "fixed") "       " ""))
@@ -86,21 +104,21 @@ This function is called by `org-babel-execute-src-block'."
 %2$s" source-indent wrapped-body)))
 
     ;; write to temporary file
-    (with-temp-file tmp-src-file (insert wrapped-body))
+    (with-temp-file ob-cobol-last-src-file (insert wrapped-body))
 
     ;; compile file and return result
     (let ((results
            (org-babel-eval
-            (format "%s -%s -x -o %s -j %s" ob-cobol-compiler source-format tmp-binary tmp-src-file)
+            (format "%s -%s -x -o %s -j %s" ob-cobol-compiler source-format tmp-binary ob-cobol-last-src-file)
             "")))
       (when results
         (org-babel-reassemble-table
          (if (or (member "table" (cdr (assoc :result-params processed-params)))
-           (member "vector" (cdr (assoc :result-params processed-params))))
-       (let ((tmp-file (org-babel-temp-file "cobol-")))
-         (with-temp-file tmp-file (insert (org-babel-trim results)))
-         (org-babel-import-elisp-from-file tmp-file))
-       (org-babel-read (org-babel-trim results) t))
+                 (member "vector" (cdr (assoc :result-params processed-params))))
+             (let ((tmp-file (org-babel-temp-file "cobol-")))
+               (with-temp-file tmp-file (insert (org-babel-trim results)))
+               (org-babel-import-elisp-from-file tmp-file))
+           (org-babel-read (org-babel-trim results) t))
          (org-babel-pick-name
           (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
          (org-babel-pick-name
