@@ -2,7 +2,6 @@
 !.gitignore
 
 .project
-.test-org-id-locations
 
 *.swp
 *~

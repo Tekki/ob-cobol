@@ -4,11 +4,11 @@
 
 ;; Author: Tekki (Rolf Stöckli)
 ;; Maintainer: Tekki
-;; Created: August 27, 2024
-;; Updated: August 29, 2024
+;; Created: 2024-08-27
+;; Updated: 2024-08-31
 ;; Keywords: cobol, languages, org, babel
 ;; Homepage: https://github.com/
-;; Version: 0.0.2
+;; Version: 0.0.3
 
 ;;; License:
 
@@ -64,8 +64,8 @@
     (message "No file available!")))
 
 (defun org-babel-execute:cobol (body params)
-  "Execute a block of Template code with org-babel.
-This function is called by `org-babel-execute-src-block'."
+  "Execute a block of COBOL code with org-babel. This function is
+called by `org-babel-execute-src-block'."
   (message "executing COBOL source code block")
 
   (setq ob-cobol-last-src-file (org-babel-temp-file "cobol-src-" ".cbl"))
