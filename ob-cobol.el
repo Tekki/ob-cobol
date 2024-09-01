@@ -5,10 +5,11 @@
 ;; Author: Tekki (Rolf Stöckli)
 ;; Maintainer: Tekki
 ;; Created: 2024-08-27
-;; Updated: 2024-08-31
-;; Keywords: cobol, languages, org, babel
-;; Homepage: https://github.com/
-;; Version: 0.0.3
+;; Updated: 2024-09-01
+;; Keywords: cobol languages org babel
+;; Homepage: https://github.com/Tekki/ob-cobol
+;; Version: 0.0.4
+;; Package-Requires: ((emacs "29.1"))
 
 ;;; License:
 
@@ -63,45 +64,59 @@
         (find-file ob-cobol-last-src-file))
     (message "No file available!")))
 
-(defun org-babel-execute:cobol (body params)
-  "Execute a block of COBOL code with org-babel. This function is
-called by `org-babel-execute-src-block'."
-  (message "executing COBOL source code block")
-
-  (setq ob-cobol-last-src-file (org-babel-temp-file "cobol-src-" ".cbl"))
-
-  (let* ((tmp-binary (org-babel-temp-file "cobol-bin-"))
-         (processed-params (org-babel-process-params params))
-         (source-format (alist-get :source-format processed-params ob-cobol-source-format))
-         (source-indent (if (string-equal source-format "fixed") "       " ""))
-         (coding-system-for-read 'utf-8)
-         (coding-system-for-write 'utf-8)
-         (wrapped-body (concat body "\n")))
+(defun ob-cobol--wrap-code (code source-format)
+  "Wrap incomplete CODE formatted as SOURCE-FORMAT according to the rules of this package."
+  (let ((wrapped code)
+        (source-indent (if (string-equal source-format "fixed") "       " "")))
 
     ;; optionally add data and procedure divisions
-    (unless (string-match-p "division\." wrapped-body)
-      (setq wrapped-body
-            (if (string-match-p "…" wrapped-body)
+    (unless (string-match-p "division\." wrapped)
+      (setq wrapped
+            (if (string-match-p "…" wrapped)
 
                 ;; split source code between data and procedure division
                 (apply 'format
                        "%1$sDATA DIVISION.
 %1$sWORKING-STORAGE SECTION.
 %2$s
+
 %1$sPROCEDURE DIVISION.
 %3$s"
                        source-indent
-                       (string-split wrapped-body "\n[ ]*…[ ]*\n"))
+                       (string-split wrapped "\n[ ]*…[ ]*\n"))
 
               ;; add everything to procedure division
-              (format "%1$sPROCEDURE DIVISION.\n%2$s" source-indent wrapped-body))))
+              (format "%1$sPROCEDURE DIVISION.\n%2$s" source-indent wrapped))))
 
     ;; optionally add identification division
-    (unless (string-match-p "identification division\." wrapped-body)
-      (setq wrapped-body
+    (unless (string-match-p "identification division\." wrapped)
+      (setq wrapped
             (format "%1$sIDENTIFICATION DIVISION.
 %1$s    PROGRAM-ID. ob-cobol.
-%2$s" source-indent wrapped-body)))
+
+%2$s" source-indent wrapped)))
+
+    ;; optionally add trailing newline
+    (unless (string-equal (substring wrapped -1) "\n")
+      (setq wrapped (concat wrapped "\n")))
+
+    wrapped))
+
+(defun org-babel-execute:cobol (body params)
+  "Execute BODY with COBOL code with org-babel.
+Accepted PARAMS:
+  :source-format, optionally set format to \"fixed\" or \"free\"
+
+This function is called by `org-babel-execute-src-block'."
+
+  (setq ob-cobol-last-src-file (org-babel-temp-file "cobol-src-" ".cbl"))
+
+  (let* ((tmp-binary (org-babel-temp-file "cobol-bin-"))
+         (processed-params (org-babel-process-params params))
+         (source-format (alist-get :source-format processed-params ob-cobol-source-format))
+         (coding-system-for-read 'utf-8)
+         (coding-system-for-write 'utf-8)
+         (wrapped-body (ob-cobol--wrap-code body source-format)))
 
     ;; write to temporary file
     (with-temp-file ob-cobol-last-src-file (insert wrapped-body))
@@ -127,8 +142,7 @@ called by `org-babel-execute-src-block'."
 ;; This function should be used to assign any variables in params in
 ;; the context of the session environment.
 (defun org-babel-prep-session:cobol (_session _params)
-  "This function does nothing as COBOL is a compiled language with no
-support for sessions."
+  "COBOL is a compiled language with no support for sessions."
   (error "COBOL is a compiled language -- no support for sessions"))
 
 (provide 'ob-cobol)

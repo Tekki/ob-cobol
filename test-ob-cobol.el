@@ -32,7 +32,7 @@
   (let* ((files (directory-files
                 ob-cobol-test-dir 'full
                 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$")))
-    (org-id-update-id-locations files)))
+    (org-id-update-id-locations files t)))
 
 (defmacro org-test-at-id (id &rest body)
   "Run body after placing the point in the headline identified by ID."
@@ -56,10 +56,99 @@
 	 (kill-buffer to-be-removed)))))
 (def-edebug-spec org-test-at-id (form body))
 
-(ert-deftest ob-cobol/assert ()
+(ert-deftest ob-cobol/00-assert ()
   (should t))
 
-(ert-deftest ob-cobol/hello1 ()
+(ert-deftest ob-cobol/01-functions ()
+  "Check if all functions are available."
+  (dolist (fn '(ob-cobol-last-src-file
+                org-babel-execute:cobol
+                org-babel-prep-session:cobol
+                ob-cobol--wrap-code))
+    (should (functionp fn))))
+
+(ert-deftest ob-cobol/02-errors ()
+  "Expected errors."
+  (should-error (org-babel-prep-session:cobol 1 2)))
+
+(ert-deftest ob-cobol/10-wrap-free ()
+  "Wrap code blocks in free format."
+  (let* ((expected "IDENTIFICATION DIVISION.
+    PROGRAM-ID. ob-cobol.
+
+PROCEDURE DIVISION.
+    DISPLAY \"Hello COBOL\".
+")
+        (sources `(,expected
+                   "IDENTIFICATION DIVISION.
+    PROGRAM-ID. ob-cobol.
+
+PROCEDURE DIVISION.
+    DISPLAY \"Hello COBOL\"."
+                   "PROCEDURE DIVISION.
+    DISPLAY \"Hello COBOL\"."
+                   "    DISPLAY \"Hello COBOL\".")))
+
+    (dolist (source sources)
+      (should (string-equal (ob-cobol--wrap-code source "free") expected)))))
+
+(ert-deftest ob-cobol/11-wrap-variables-free ()
+  "Wrap code blocks with variables in free format."
+  (let* ((expected "IDENTIFICATION DIVISION.
+    PROGRAM-ID. ob-cobol.
+
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01 username PIC(30) VALUE \"Mainframe\".
+
+PROCEDURE DIVISION.
+    DISPLAY username.
+")
+        (sources `(,expected
+                   "01 username PIC(30) VALUE \"Mainframe\".
+…
+    DISPLAY username.")))
+
+    (dolist (source sources)
+      (should (string-equal (ob-cobol--wrap-code source "free") expected)))))
+
+(ert-deftest ob-cobol/12-wrap-fixed ()
+  "Wrap code blocks in fixed format."
+  (let* ((expected "       IDENTIFICATION DIVISION.
+           PROGRAM-ID. ob-cobol.
+
+       PROCEDURE DIVISION.
+000100     DISPLAY \"Hello COBOL\".
+")
+         (sources `(,expected
+                    "       PROCEDURE DIVISION.
+000100     DISPLAY \"Hello COBOL\"."
+                    "000100     DISPLAY \"Hello COBOL\".")))
+
+    (dolist (source sources)
+      (should (string-equal (ob-cobol--wrap-code source "fixed") expected)))))
+
+(ert-deftest ob-cobol/13-wrap-variables-fixed ()
+  "Wrap code blocks with variables in fixed format."
+  (let* ((expected "       IDENTIFICATION DIVISION.
+           PROGRAM-ID. ob-cobol.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+000100 01 username PIC(30) VALUE \"Mainframe\".
+
+       PROCEDURE DIVISION.
+000200     DISPLAY username.
+")
+        (sources `(,expected
+                   "000100 01 username PIC(30) VALUE \"Mainframe\".
+   …
+000200     DISPLAY username.")))
+
+    (dolist (source sources)
+      (should (string-equal (ob-cobol--wrap-code source "fixed") expected)))))
+
+(ert-deftest ob-cobol/20-hello1 ()
   "Complete code block."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
@@ -67,7 +156,7 @@
       (org-babel-next-src-block)
       (should (string-equal "Hello COBOL 1" (org-babel-execute-src-block))))))
 
-(ert-deftest ob-cobol/hello2 ()
+(ert-deftest ob-cobol/21-hello2 ()
   "Code without identification division."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
@@ -75,7 +164,7 @@
       (org-babel-next-src-block)
       (should (string-equal "Hello COBOL 2" (org-babel-execute-src-block))))))
 
-(ert-deftest ob-cobol/hello3 ()
+(ert-deftest ob-cobol/22-hello3 ()
   "Code without any divisions."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
@@ -83,7 +172,7 @@
       (org-babel-next-src-block)
       (should (string-equal "Hello COBOL 3" (org-babel-execute-src-block))))))
 
-(ert-deftest ob-cobol/variables ()
+(ert-deftest ob-cobol/23-variables ()
   "Code with variables."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
@@ -91,7 +180,7 @@
       (org-babel-next-src-block)
       (should (string-equal "Your name is Mainframe" (org-babel-execute-src-block))))))
 
-(ert-deftest ob-cobol/fixed-hello1 ()
+(ert-deftest ob-cobol/30-fixed-hello1 ()
   "Code with fixed format."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
@@ -99,7 +188,7 @@
       (org-babel-next-src-block)
       (should (string-equal "Hello COBOL 1b" (org-babel-execute-src-block))))))
 
-(ert-deftest ob-cobol/fixed-hello2 ()
+(ert-deftest ob-cobol/31-fixed-hello2 ()
   "Fixed format without identification division."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
@@ -107,7 +196,7 @@
       (org-babel-next-src-block)
       (should (string-equal "Hello COBOL 2b" (org-babel-execute-src-block))))))
 
-(ert-deftest ob-cobol/fixed-hello3 ()
+(ert-deftest ob-cobol/32-fixed-hello3 ()
   "Fixed format without any divisions."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
@@ -115,7 +204,7 @@
       (org-babel-next-src-block)
       (should (string-equal "Hello COBOL 3b" (org-babel-execute-src-block))))))
 
-(ert-deftest ob-cobol/fixed-variables ()
+(ert-deftest ob-cobol/33-fixed-variables ()
   "Fixed format with variables."
   (let (org-confirm-babel-evaluate)
     (ob-cobol-test-update-id-locations)
