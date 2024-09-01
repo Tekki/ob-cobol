@@ -1,5 +1,7 @@
 # ob-cobol
 
+![](img/ob-cobol.gif)
+
 ## Overview
 
 `ob-cobol` enables
