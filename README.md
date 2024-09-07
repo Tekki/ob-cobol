@@ -101,6 +101,21 @@ or globally in the init file
 (setq ob-cobol-source-format "fixed")
 ```
 
+In the same way you can change the dialect of the compiler with the
+`dialect` header
+
+```cobol
+#+begin_src cobol :dialect ibm
+*> some code in IBM COBOL
+#+end_src
+```
+
+or in the init file
+
+```elisp
+(setq ob-cobol-dialect "ibm")
+```
+
 ## Installation
 
 ### ob-cobol
@@ -120,14 +135,15 @@ init file.
   :load-path "~/git/ob-cobol/")
 ```
 
-If you want to work with fixed instead of free format, change the
-default.
+If you want to work in IBM dialect with fixed instead of free format,
+change the default.
 
 ```elisp
 (use-package ob-cobol
   :load-path "~/git/ob-cobol/"
   :config
-  (setq ob-cobol-source-format "fixed"))
+  (setq ob-cobol-dialect "ibm"
+        ob-cobol-source-format "fixed"))
 ```
 
 ### GnuCOBOL

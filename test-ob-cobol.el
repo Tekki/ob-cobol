@@ -180,6 +180,19 @@ PROCEDURE DIVISION.
       (org-babel-next-src-block)
       (should (string-equal "Your name is Mainframe" (org-babel-execute-src-block))))))
 
+(ert-deftest ob-cobol/24-variables-ibm ()
+  "Code with variables, IBM dialect."
+  (let (org-confirm-babel-evaluate)
+    (ob-cobol-test-update-id-locations)
+    (org-babel-eval-wipe-error-buffer)
+    (org-test-at-id "8b8d8ce7-7198-4cd0-a974-7ce4a92287b3"
+      (org-babel-next-src-block)
+      (should (string-equal "IBM" (org-babel-execute-src-block)))
+      (when (get-buffer org-babel-error-buffer-name)
+        (with-current-buffer org-babel-error-buffer-name
+          (should-not (string-match-p "OCCURS DEPENDING ON"
+                                      (buffer-substring-no-properties (point-min) (point-max)))))))))
+
 (ert-deftest ob-cobol/30-fixed-hello1 ()
   "Code with fixed format."
   (let (org-confirm-babel-evaluate)

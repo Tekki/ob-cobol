@@ -43,6 +43,20 @@ DISPLAY "Hello COBOL 3".
 DISPLAY "Your name is " FUNCTION trim(username).
 #+end_src
 
+* With variables, IBM dialect
+:PROPERTIES:
+:ID:       8b8d8ce7-7198-4cd0-a974-7ce4a92287b3
+:END:
+#+source: basic
+#+begin_src cobol :results silent :dialect ibm
+01 ws-table.
+    02 rowcount PIC 9 VALUE 2.
+    02 ws-row VALUE "GnuIBM".
+        03 row-content PIC X(3) OCCURS 99 DEPENDING ON rowcount.
+…
+DISPLAY row-content(2).
+#+end_src
+
 * Basic test with fixed format
 :PROPERTIES:
 :ID:       4a3eeb0a-6dff-40a2-b560-69197b31c5cd

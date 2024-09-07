@@ -5,10 +5,10 @@
 ;; Author: Tekki (Rolf Stöckli)
 ;; Maintainer: Tekki
 ;; Created: 2024-08-27
-;; Updated: 2024-09-01
+;; Updated: 2024-09-07
 ;; Keywords: cobol languages org babel
 ;; Homepage: https://github.com/Tekki/ob-cobol
-;; Version: 0.0.4
+;; Version: 0.0.5
 ;; Package-Requires: ((emacs "29.1"))
 
 ;;; License:
@@ -43,8 +43,41 @@
 
 (defvar org-babel-default-header-args:cobol '())
 
-(defvar ob-cobol-source-format "free"
-  "Default format for source code, either \"free\" or \"fixed\".")
+(defcustom ob-cobol-source-format "free"
+  "Default format for source code, either \"free\" or \"fixed\".
+
+Overwrite in code block with parameter `:source-format'."
+  :group 'org-babel
+  :type '(choice (const "free")
+                 (const "fixed")))
+
+(defcustom ob-cobol-dialect "default"
+  "The COBOL dialect used by the compiler.
+
+One of \"default\", \"acu\", \"acu-strict\", \"bs2000\",
+\"bs2000-strict\", \"cobol2002\", \"cobol2014\", \"cobol85\",
+\"ibm\", \"ibm-strict\", \"mf\", \"mf-strict\", \"mvs\",
+\"mvs-strict\", \"rm\", \"rm-strict\", \"xopen\".
+
+Overwrite in code block with parameter `:dialect'."
+  :group 'org-babel
+  :type '(choice (const "default")
+                 (const "acu")
+                 (const "acu-strict")
+                 (const "bs2000")
+                 (const "bs2000-strict")
+                 (const "cobol2002")
+                 (const "cobol2014")
+                 (const "cobol85")
+                 (const "ibm")
+                 (const "ibm-strict")
+                 (const "mf")
+                 (const "mf-strict")
+                 (const "mvs")
+                 (const "mvs-strict")
+                 (const "rm")
+                 (const "rm-strict")
+                 (const "xopen")))
 
 (defvar ob-cobol-compiler "cobc"
   "Path to the COBOL compiler.")
@@ -105,7 +138,8 @@
 (defun org-babel-execute:cobol (body params)
   "Execute BODY with COBOL code with org-babel.
 Accepted PARAMS:
-  :source-format, optionally set format to \"fixed\" or \"free\"
+  `:source-format', optionally set format to \"fixed\" or \"free\"
+  `:dialect', optionally set the dialect of the code
 
 This function is called by `org-babel-execute-src-block'."
 
@@ -113,6 +147,7 @@ This function is called by `org-babel-execute-src-block'."
 
   (let* ((tmp-binary (org-babel-temp-file "cobol-bin-"))
          (processed-params (org-babel-process-params params))
+         (dialect (alist-get :dialect processed-params ob-cobol-dialect))
          (source-format (alist-get :source-format processed-params ob-cobol-source-format))
          (coding-system-for-read 'utf-8)
          (coding-system-for-write 'utf-8)
@@ -122,22 +157,26 @@ This function is called by `org-babel-execute-src-block'."
     (with-temp-file ob-cobol-last-src-file (insert wrapped-body))
 
     ;; compile file and return result
-    (let ((results
-           (org-babel-eval
-            (format "%s -%s -x -o %s -j %s" ob-cobol-compiler source-format tmp-binary ob-cobol-last-src-file)
-            "")))
-      (when results
-        (org-babel-reassemble-table
-         (if (or (member "table" (cdr (assoc :result-params processed-params)))
-                 (member "vector" (cdr (assoc :result-params processed-params))))
-             (let ((tmp-file (org-babel-temp-file "cobol-")))
-               (with-temp-file tmp-file (insert (org-babel-trim results)))
-               (org-babel-import-elisp-from-file tmp-file))
-           (org-babel-read (org-babel-trim results) t))
-         (org-babel-pick-name
-          (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
-         (org-babel-pick-name
-          (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))))
+    (when-let ((results
+                (org-babel-eval
+                 (format "%s -%s -std=%s -x -o %s -j %s"
+                         ob-cobol-compiler
+                         source-format
+                         dialect
+                         tmp-binary
+                         ob-cobol-last-src-file)
+                 "")))
+      (org-babel-reassemble-table
+       (if (or (member "table" (cdr (assoc :result-params processed-params)))
+               (member "vector" (cdr (assoc :result-params processed-params))))
+           (let ((tmp-file (org-babel-temp-file "cobol-")))
+             (with-temp-file tmp-file (insert (org-babel-trim results)))
+             (org-babel-import-elisp-from-file tmp-file))
+         (org-babel-read (org-babel-trim results) t))
+       (org-babel-pick-name
+        (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+       (org-babel-pick-name
+        (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
 
 ;; This function should be used to assign any variables in params in
 ;; the context of the session environment.
