@@ -57,6 +57,17 @@ DISPLAY "Your name is " FUNCTION trim(username).
 DISPLAY row-content(2).
 #+end_src
 
+* Numbers, IBM dialect
+:PROPERTIES:
+:ID:       4aaa24ff-1e49-498f-a68d-46460962e10f
+:END:
+#+source: basic
+#+begin_src cobol :results silent :dialect ibm
+01 negative-number PIC S9(6)V9(2) VALUE -12345.67.
+…
+DISPLAY negative-number.
+#+end_src
+
 * Basic test with fixed format
 :PROPERTIES:
 :ID:       4a3eeb0a-6dff-40a2-b560-69197b31c5cd

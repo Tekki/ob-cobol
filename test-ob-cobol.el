@@ -193,6 +193,14 @@ PROCEDURE DIVISION.
           (should-not (string-match-p "OCCURS DEPENDING ON"
                                       (buffer-substring-no-properties (point-min) (point-max)))))))))
 
+(ert-deftest ob-cobol/25-numbers-ibm ()
+  "Code with negative numbers, IBM dialect."
+  (let (org-confirm-babel-evaluate)
+    (ob-cobol-test-update-id-locations)
+    (org-test-at-id "4aaa24ff-1e49-498f-a68d-46460962e10f"
+      (org-babel-next-src-block)
+      (should (string-equal "01234567-" (org-babel-execute-src-block))))))
+
 (ert-deftest ob-cobol/30-fixed-hello1 ()
   "Code with fixed format."
   (let (org-confirm-babel-evaluate)
