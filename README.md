@@ -162,7 +162,7 @@ correct source format.
 ```elisp
 (use-package cobol-mode
   :ensure t
-  :config
+  :init
   (setq cobol-source-format 'free))
 ```
 
