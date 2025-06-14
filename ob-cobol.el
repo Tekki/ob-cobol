@@ -5,10 +5,10 @@
 ;; Author: Tekki (Rolf Stöckli)
 ;; Maintainer: Tekki
 ;; Created: 2024-08-27
-;; Updated: 2024-09-07
+;; Updated: 2025-06-07
 ;; Keywords: cobol languages org babel
 ;; Homepage: https://github.com/Tekki/ob-cobol
-;; Version: 0.0.5
+;; Version: 1.0.0
 ;; Package-Requires: ((emacs "29.1"))
 
 ;;; License:
