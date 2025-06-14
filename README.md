@@ -118,12 +118,18 @@ or in the init file
 
 ## Installation
 
-### ob-cobol — Emacs 30 or newer
+### COBOL Compiler
+
+`ob-cobol` expects a [GnuCOBOL](https://gnucobol.sourceforge.io/)
+compiler accessible under `cobc`. If it is not located in the path,
+you can change variable `ob-cobol-compiler`. Another compiler will
+only work if it uses the same command line arguments.
+
+### ob-cobol
 
 ```elisp
 (use-package ob-cobol
-  :vc (:url "https://github.com/Tekki/ob-cobol.git"
-       :rev :newest))
+  :ensure t)
 ```
 
 If you want to work in IBM dialect with fixed instead of free format,
@@ -131,42 +137,17 @@ change the defaults.
 
 ```elisp
 (use-package ob-cobol
-  :vc (:url "https://github.com/Tekki/ob-cobol.git"
-       :rev :newest)
+  :ensure t)
   :config
   (setq ob-cobol-dialect "ibm"
         ob-cobol-source-format "fixed"))
 ```
 
-### ob-cobol — older Emacs versions
-
-Clone this repo to a local folder.
-
-```bash
-cd ~/git
-git clone https://github.com/Tekki/ob-cobol
-```
-
-This will download the code to `~/git/ob-cobol`. Then add this path to
-your init file.
-
-```elisp
-(use-package ob-cobol
-  :load-path "~/git/ob-cobol/")
-```
-
-### GnuCOBOL
-
-`ob-cobol` expects a [GnuCOBOL](https://gnucobol.sourceforge.io/)
-compiler accessible under `cobc`. If it is not located in the path,
-you can change variable `ob-cobol-compiler`. Another compiler will
-only work if it uses the same command line arguments.
-
 ### cobol-mode
 
 [cobol-mode](https://elpa.gnu.org/packages/cobol-mode.html) is not
 required, but useful for syntax highlighting. Remember to set the
-correct source format.
+correct source format in advance.
 
 ```elisp
 (use-package cobol-mode
