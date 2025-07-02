@@ -7,13 +7,13 @@
 ~ob-cobol~ enables [[http://orgmode.org/worg/org-contrib/babel/intro.html][Org-Babel]] support for evaluating COBOL code.
 
 #+begin_example
-#+begin_src cobol
+​#+begin_src cobol
 IDENTIFICATION DIVISION.
     PROGRAM-ID. ob-cobol.
 
 PROCEDURE DIVISION.
     DISPLAY "Hello COBOL".
-#+end_src
+​#+end_src
 
 #+RESULTS:
 : Hello COBOL
@@ -78,11 +78,11 @@ The default source format is changed for a single code block using the
 ~source-format~ header
 
 #+begin_example
-#+begin_src cobol :source-format fixed
+​#+begin_src cobol :source-format fixed
 000100 01 username PIC X(30) VALUE "Mainframe B".
    …
 000200 DISPLAY "Your name is " FUNCTION trim(username).
-#+end_src
+​#+end_src
 #+end_example
 
 or globally in the init file
@@ -95,9 +95,9 @@ In the same way you can change the dialect of the compiler with the
 ~dialect~ header
 
 #+begin_example
-#+begin_src cobol :dialect ibm
+​#+begin_src cobol :dialect ibm
 *> some code in IBM COBOL
-#+end_src
+​#+end_src
 #+end_example
 
 or in the init file
@@ -117,33 +117,33 @@ arguments.
 
 *** ob-cobol
 
-#+begin_example
+#+begin_src elisp
 (use-package ob-cobol
   :ensure t)
-#+end_example
+#+end_src
 
 If you want to work in IBM dialect with fixed instead of free format,
 change the defaults.
 
-#+begin_example
+#+begin_src elisp
 (use-package ob-cobol
   :ensure t)
   :config
   (setq ob-cobol-dialect "ibm"
         ob-cobol-source-format "fixed"))
-#+end_example
+#+end_src
 
 *** cobol-mode
 
 [[https://elpa.gnu.org/packages/cobol-mode.html][cobol-mode]] is not required, but useful for syntax highlighting.
 Remember to set the correct source format in advance.
 
-#+begin_example
+#+begin_src elisp
 (use-package cobol-mode
   :ensure t
   :init
   (setq cobol-source-format 'free))
-#+end_example
+#+end_src
 
 ** License
 
