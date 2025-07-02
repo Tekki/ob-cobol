@@ -5,7 +5,7 @@
 ;; Author: Tekki (Rolf Stöckli)
 ;; Maintainer: Tekki
 ;; Created: 2024-08-27
-;; Updated: 2025-06-07
+;; Updated: 2025-07-02
 ;; Keywords: cobol languages org babel
 ;; Homepage: https://github.com/Tekki/ob-cobol
 ;; Version: 1.0.0
